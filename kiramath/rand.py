@@ -61,6 +61,7 @@ class Random:
             self.seed = datetime.now().microsecond
         else:
             self.seed = seed
+        self.MT = MT19937(seed=self.seed)
 
     def set_seed(self, seed):
         self.seed = seed
@@ -69,11 +70,7 @@ class Random:
         return self.seed
 
     def random(self, n=1):
-        MT = MT19937(seed=self.seed)
-        U = [0]*n
-        for i in range(n):
-            self.set_seed(MT.extract_number())
-            U[i] = self.seed / 0xFFFFFFFF
+        U = [self.MT.extract_number() / 0xFFFFFFFF for _ in range(n)]
         return U
 
     def bernoulli(self, p, n=1):
