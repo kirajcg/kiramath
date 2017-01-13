@@ -12,6 +12,7 @@ def adj(A):
     return transpose(cf)
 
 
+# Borrowed code for cholesky decomposition
 def cholesky(A):
     L = [[0.0] * len(A) for _ in range(len(A))]
     for i, (Ai, Li) in enumerate(zip(A, L)):
