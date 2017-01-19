@@ -29,9 +29,25 @@ def jackknife(X, J, n):
     return jack
 
 
+def mad(L):
+    m = median(L)
+    shift = [abs(l - m) for l in L]
+    return median(shift)
+
+
 def mean(L):
     n = len(L)
     return sum(L) / n
+
+
+def median(L):
+    n = len(L)
+    L_copy = L.copy()
+    L_copy.sort()
+    if n % 2 == 1:
+        return L_copy[n//2]
+    else:
+        return mean([L_copy[n//2 - 1], L_copy[n//2]])
 
 
 def sample(X, n, replacement=False):
@@ -43,6 +59,10 @@ def sample(X, n, replacement=False):
         if replacement == False:
             X_copy.pop(k)
     return S
+
+
+def shuffle(X):
+    return sample(X, len(X), replacement=False)
 
 
 def std(L):

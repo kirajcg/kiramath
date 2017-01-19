@@ -90,7 +90,7 @@ class Random:
         E = [-1 / lparam * elem.log(u) for u in U]
         return E
 
-    def normal(self, mu=0, sigma=1, n=1, **kwargs):
+    def normal(self, mu=0, sigma=1, n=1):
         U = self.random(n=n)
         N = [mu + sigma * elem.sqrt(2) * spec.erfinv(2 * u - 1) for u in U]
         return N

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from . import rand
+from . import linalg
 
 
 def arma_model(L, p=0, q=0):
@@ -17,8 +18,9 @@ def arma_process(ar_coef=[1], ma_coef=[1], N=1, sigma=1):
     return X
 
 
-def acf(L, h):
-    return acvf(L, h) / acvf(L, 0)
+def acf(L, h_max):
+    # returns acf for 0, ..., h_max - 1
+    return [acvf(L, h) / acvf(L, 0) for h in range(h_max)]
 
 
 def acvf(L, h):
@@ -36,5 +38,10 @@ def mean(L):
     return sum(L) / n
 
 
-def pacf(L, h):
-    pass
+def pacf(L, h_max):
+    acfs = acf(L, h_max)
+    A = [acfs[i:] + acfs[:i] for i in range(h_max)]
+    b = acf(L, h_max + 1)[1:]
+    sol = linalg.solve(A, b)
+    # return pacf for 0, ..., h_max - 1 as is pythonesque
+    return acf(L, 1) + [item for sublist in sol for item in sublist][:-1]
