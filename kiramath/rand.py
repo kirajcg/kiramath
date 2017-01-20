@@ -59,6 +59,7 @@ class Random:
     def poisson(self, lparam=1, n=1):
         pass
 
+    # random integer in the range [a, b)
     def randint(self, a, b, n=1):
         U = self.random(n=n)
         R = [a + int((b - a)*u) for u in U]
