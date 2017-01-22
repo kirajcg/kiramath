@@ -2,6 +2,7 @@
 
 from . import rand
 from . import linalg
+from . import stats
 
 
 def arma_model(L, p=0, q=0):
@@ -27,6 +28,14 @@ def acvf(L, h):
     n = len(L)
     return sum([(L[t + abs(h)] - mean(L)) * (L[t] - mean(L)) for t in
                 range(1, n - abs(h))])
+
+
+# Moving-block bootstrap
+def blockboot(L, b):
+    N = len(L)
+    Lsplit = [L[i:i+b] for i in range(N-b+1)]
+    L_out = stats.sample(Lsplit, N//b)
+    return [item for sublist in L_out for item in sublist]
 
 
 def forecast(L, n=0):

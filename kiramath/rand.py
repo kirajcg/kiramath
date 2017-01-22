@@ -20,6 +20,7 @@ class Random:
     def get_seed(self):
         return self.seed
 
+    # U(0, 1) to base all the other methods on
     def random(self, n=1):
         a = 1664525
         c = 1013904223
@@ -30,6 +31,7 @@ class Random:
             U[i] = self.seed / m
         return U
 
+    # Some discrete distributions
     def bernoulli(self, p, n=1):
         U = self.random(n=n)
         B = [1 if u < p else 0 for u in U]
@@ -39,10 +41,41 @@ class Random:
         B = [sum(self.bernoulli(p, n)) for _ in range(N)]
         return B
 
+    def geo(self, p, n=1):
+        U = self.random(n=n)
+        G = [int(elem.log(u)/elem.log(1 - p)) + 1 for u in U]
+        return G
+
+    def poisson(self, lparam=1, n=1):
+        P = [0]*n
+        U = random(n=n)
+        for i in range(n):
+            j = 0
+            pr = elem.exp(-lparam)
+            F = pr
+            while U[i] >= F:
+                pr *= lparam/(j+1)
+                F += pr
+                j += 1
+            P[i] = j
+        return P
+
+    # random integer in the range [a, b) as is pythonesque
+    def randint(self, a, b, n=1):
+        U = self.random(n=n)
+        R = [a + int((b - a)*u) for u in U]
+        return R
+
+    # Some continuous distributions
     def exp(self, lparam=1, n=1):
         U = self.random(n=n)
         E = [-1 / lparam * elem.log(u) for u in U]
         return E
+
+    def gamma(self, lparam, n, N=1):
+        G = [-1/lparam * sum([elem.log(u) for u in random(n=n)]) for _ in 
+                range(N)]
+        return G
 
     def normal(self, mu=0, sigma=1, n=1):
         U = self.random(n=n)
@@ -56,23 +89,19 @@ class Random:
         SX_flat = [item for sublist in SX for item in sublist]
         return [sx + m for sx, m in zip(SX_flat, mu)]
 
-    def poisson(self, lparam=1, n=1):
-        pass
-
-    # random integer in the range [a, b)
-    def randint(self, a, b, n=1):
-        U = self.random(n=n)
-        R = [a + int((b - a)*u) for u in U]
-        return R
-
 
 _inst = Random()
 get_seed = _inst.get_seed
 set_seed = _inst.set_seed
 random = _inst.random
+
 bernoulli = _inst.bernoulli
-exp = _inst.exp
-normal = _inst.normal
-normmult = _inst.normmult
+binomial = _inst.binomial
+geo = _inst.geo
 poisson = _inst.poisson
 randint = _inst.randint
+
+exp = _inst.exp
+gamma = _inst.gamma
+normal = _inst.normal
+normmult = _inst.normmult
