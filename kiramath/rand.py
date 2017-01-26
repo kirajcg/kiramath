@@ -21,14 +21,14 @@ class Random:
         return self.seed
 
     # U(0, 1) to base all the other methods on
-    def random(self, n=1):
+    def random(self, mn=0, mx=1, n=1):
         a = 1664525
         c = 1013904223
         m = 2**32
         U = [0]*n
         for i in range(n):
             self.seed = (a * self.seed + c) % m
-            U[i] = self.seed / m
+            U[i] = (mx - mn) * self.seed / m + mn
         return U
 
     # Some discrete distributions

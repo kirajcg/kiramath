@@ -6,9 +6,7 @@ from . import rand
 
 def bootstrap(X, B):
     n = len(X)
-    boot = [0]*B
-    for i in range(B):
-        boot[i] = sample(X, n, replacement=True)
+    boot = [sample(X, n, replacement=True) for _ in range(B)]
     return boot
 
 
@@ -23,9 +21,7 @@ def cov(L1, L2):
 
 
 def jackknife(X, J, n):
-    jack = [0]*J
-    for i in range(J):
-        jack[i] = sample(X, n, replacement=False)
+    jack = [sample(X, n, replacement=False) for _ in range(J)]
     return jack
 
 
