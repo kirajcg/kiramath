@@ -31,11 +31,14 @@ def acvf(L, h):
 
 
 # Moving-block bootstrap
-def blockboot(L, b):
+def blockboot(L, b, B=1):
     N = len(L)
     Lsplit = [L[i:i+b] for i in range(N-b+1)]
-    L_out = stats.sample(Lsplit, N//b)
-    return [item for sublist in L_out for item in sublist]
+    L_out = [0]*B
+    for i in range(B):
+        L_b = stats.sample(Lsplit, N//b)
+        L_out[i] = [item for sublist in L_b for item in sublist]
+    return L_out
 
 
 def forecast(L, n=0):
@@ -45,6 +48,47 @@ def forecast(L, n=0):
 def mean(L):
     n = len(L)
     return sum(L) / n
+
+
+# Maximum entropy bootstrap
+def meboot(L, B=1):
+    N = len(L)
+    # step 1: sort L and save indices
+    L_sort = sorted((e,i) for i,e in enumerate(L))
+    L_vals = [l[0] for l in L_sort]
+    L_ind = [l[1] for l in L_sort]
+    L_out = [0]*B
+    # repetition
+    for i in range(B):
+        # step 2: compute intermediate points from order statistics
+        Z = [(L_vals[i] + L_vals[i+1])/2 for i in range(N-1)]
+        # step 3: extend intermediate points with endpoints
+        m_trm = mean([abs(L[i] - L[i-1]) for i in range(1, N)])
+        Z = [L_vals[0] - m_trm] + Z + [L_vals[-1] + m_trm]
+        # step 4: compute mean of maximum entropy density
+        m = [0]*N
+        m[0] = 0.75*L_vals[0] + 0.25*L_vals[1]
+        for k in range(1, N-1):
+            m[k] = 0.25*L_vals[k-1] + 0.5*L_vals[k] + 0.25*L_vals[k+1]
+        m[-1] = 0.25*L_vals[-2] + 0.75*L_vals[-1]
+        # step 5: compute quantiles based on U(0, 1) nunmbers
+        U = sorted(rand.random(n=N))
+        quantiles = [0]*N
+        # linear interpolation to find quantiles
+        x = [float(y)/N for y in range(N+1)]
+        for k in range(N):
+            ind = min(range(len(x)), key=lambda i: abs(x[i] - U[k]))
+            if x[ind] > U[k]:
+                ind -= 1
+            # mean-preservation
+            c = (2*m[ind] - Z[ind] - Z[ind + 1]) / 2
+            y0 = Z[ind] + c
+            y1 = Z[ind + 1] + c
+            quantiles[k] = y0 + (U[k] - x[ind]) * \
+                            (y1 - y0) / (x[ind + 1] - x[ind])
+        # step 6: reorder quantiles according to index vector
+        L_out[i] = [x for y, x in sorted(zip(L_ind, quantiles))]
+    return L_out
 
 
 def pacf(L, h_max):
