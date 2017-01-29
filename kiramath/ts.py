@@ -19,9 +19,8 @@ def arma_process(ar_coef=[1], ma_coef=[1], N=1, sigma=1):
     return X
 
 
-def acf(L, h_max):
-    # returns acf for 0, ..., h_max - 1
-    return [acvf(L, h) / acvf(L, 0) for h in range(h_max)]
+def acf(L, h):
+    return acvf(L, h) / acvf(L, 0)
 
 
 def acvf(L, h):
@@ -51,15 +50,15 @@ def mean(L):
 
 
 # Maximum entropy bootstrap
-def meboot(L, B=1):
+def meboot(L, J=1):
     N = len(L)
     # step 1: sort L and save indices
     L_sort = sorted((e,i) for i,e in enumerate(L))
     L_vals = [l[0] for l in L_sort]
     L_ind = [l[1] for l in L_sort]
-    L_out = [0]*B
+    L_out = [0]*J
     # repetition
-    for i in range(B):
+    for j in range(J):
         # step 2: compute intermediate points from order statistics
         Z = [(L_vals[i] + L_vals[i+1])/2 for i in range(N-1)]
         # step 3: extend intermediate points with endpoints
@@ -87,14 +86,16 @@ def meboot(L, B=1):
             quantiles[k] = y0 + (U[k] - x[ind]) * \
                             (y1 - y0) / (x[ind + 1] - x[ind])
         # step 6: reorder quantiles according to index vector
-        L_out[i] = [x for y, x in sorted(zip(L_ind, quantiles))]
+        L_out[j] = [x for y, x in sorted(zip(L_ind, quantiles))]
     return L_out
 
 
-def pacf(L, h_max):
-    acfs = acf(L, h_max)
-    A = [acfs[i:] + acfs[:i] for i in range(h_max)]
-    b = acf(L, h_max + 1)[1:]
-    sol = linalg.solve(A, b)
-    # return pacf for 0, ..., h_max - 1 as is pythonesque
-    return acf(L, 1) + [item for sublist in sol for item in sublist][:-1]
+def pacf(L, h):
+    if h == 1:
+        return acf(L, 1)
+    else:
+        acfs = [acf(L, hh) for hh in range(h)]
+        A = [acfs[i:] + acfs[:i] for i in range(h)]
+        b = [acf(L, hh) for hh in range(h + 1)][1:]
+        sol = linalg.solve(A, b)
+        return sol[-1][0]

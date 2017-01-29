@@ -40,7 +40,7 @@ def sin(x, N=2**7):
     return y
 
 
-def sqrt(S, tol=1e-15):
+def sqrt(S, tol=1e-14):
     x = S
     while abs(x**2 - S) > tol:
         x = (x + S / x) / 2
